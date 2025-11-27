@@ -1,15 +1,85 @@
-import { type Score, type Scores, type Dices } from "./App";
-import { type Dispatch, type SetStateAction } from "react";
+import { type Dices } from "./App";
+import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 
 interface ScoreBoardProps {
-  scores: Scores;
-  setScores?: Dispatch<SetStateAction<Scores>>;
+  allowScore: boolean;
+  setAllowScore?: Dispatch<SetStateAction<boolean>>;
   dices: Dices;
   setRollLeft?: Dispatch<SetStateAction<number>>;
 }
 
+export interface Score {
+  id: ScoreList;
+  name: string;
+  score: number;
+}
+export type Scores = Score[];
+
+export type ScoreList =
+  | "Ones"
+  | "Twos"
+  | "Threes"
+  | "Fours"
+  | "Fives"
+  | "Sixes"
+  | "Bonus"
+  | "OnePair"
+  | "TwoPairs"
+  | "ThreeKind"
+  | "FourKind"
+  | "SmallStraight"
+  | "BigStraight"
+  | "FullHouse"
+  | "Chance"
+  | "Yatzy"
+  | "Sum";
+
 function ScoreBoard(props: ScoreBoardProps) {
-  const { scores, setScores, dices, setRollLeft } = props;
+  const { dices, allowScore, setAllowScore, setRollLeft } = props;
+
+  const [scores, setScores] = useState<Scores>([
+    { id: "Ones", name: "Ones", score: 0 },
+    { id: "Twos", name: "Twos", score: 0 },
+    { id: "Threes", name: "Threes", score: 0 },
+    { id: "Fours", name: "Fours", score: 0 },
+    { id: "Fives", name: "Fives", score: 0 },
+    { id: "Sixes", name: "Sixes", score: 0 },
+    { id: "Bonus", name: "Bonus", score: 0 },
+    { id: "OnePair", name: "One Pair", score: 0 },
+    { id: "TwoPairs", name: "Two Pairs", score: 0 },
+    { id: "ThreeKind", name: "Three of a Kind", score: 0 },
+    { id: "FourKind", name: "Four of a Kind", score: 0 },
+    { id: "SmallStraight", name: "Small Straight", score: 0 },
+    { id: "BigStraight", name: "Big Straight", score: 0 },
+    { id: "FullHouse", name: "Full House", score: 0 },
+    { id: "Chance", name: "Chance", score: 0 },
+    { id: "Yatzy", name: "Yatzy", score: 0 },
+    { id: "Sum", name: "Sum", score: 0 },
+  ]);
+
+  //* RÄKNA UT BONUS
+  useEffect(() => {
+    let sum: number = 0;
+    scores.map((score) => {
+      if (
+        score.id === "Ones" ||
+        score.id === "Twos" ||
+        score.id === "Threes" ||
+        score.id === "Fours" ||
+        score.id === "Fives" ||
+        score.id === "Sixes"
+      ) {
+        sum = sum + score.score;
+      }
+      if (sum >= 63 && scores[6].score === 0) {
+        setScores(
+          scores.map((score) => {
+            return score.name === "Bonus" ? { ...score, score: 50 } : score;
+          })
+        );
+      }
+    });
+  }, [scores]);
 
   //* KOLLA EFTER SAMMA NUMMER
   function sameNumber(id: string, number: number) {
@@ -22,17 +92,20 @@ function ScoreBoard(props: ScoreBoardProps) {
 
   //* DELA UT POÄNG
   function givePoint(id: string, sum: number) {
-    if (setScores) {
-      setScores(
-        scores.map((score) => {
-          return score.id === id && score.score === 0
-            ? { ...score, score: sum }
-            : score;
-        })
-      );
-    }
-    if (setRollLeft) {
-      setRollLeft(3);
+    if (allowScore) {
+      if (setScores) {
+        setScores(
+          scores.map((score) => {
+            return score.id === id && score.score === 0
+              ? { ...score, score: sum }
+              : score;
+          })
+        );
+      }
+      if (setRollLeft && setAllowScore) {
+        setRollLeft(3);
+        setAllowScore(false);
+      }
     }
   }
 
@@ -93,23 +166,18 @@ function ScoreBoard(props: ScoreBoardProps) {
   }
 
   // //* UPPDATERA SUMMAN
-  // function updateSum(): void {
-  //   let sum: number = 0;
+  function updateSum(): void {
+    scores.map((score) => {
+      if (score.id === "Sum") {
+        const sum = scores
+          .filter((s) => s.id !== "Sum")
+          .reduce((acc, curr) => acc + curr.score, 0);
 
-  //   scores.map((score) => {
-  //     if (score.id !== "Sum") {
-  //       sum = sum + score.score;
-  //     }
-  //   });
-  //   console.log(sum);
-  //   setScores(
-  //     scores.map((score) => {
-  //       return score.id === "Sum" && score.score === 0
-  //         ? { ...score, score: sum }
-  //         : score;
-  //     })
-  //   );
-  // }
+        return { ...score, score: sum };
+      }
+      return score;
+    });
+  }
 
   //* HANDLE CLICK SCOREBOARD
   function handleClick(id: string) {
@@ -118,36 +186,42 @@ function ScoreBoard(props: ScoreBoardProps) {
       case "Ones": {
         sameNumber(id, 1);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* tvåor
       case "Twos": {
         sameNumber(id, 2);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* treor
       case "Threes": {
         sameNumber(id, 3);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* fyror
       case "Fours": {
         sameNumber(id, 4);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* femmor
       case "Fives": {
         sameNumber(id, 5);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* sexor
       case "Sixes": {
         sameNumber(id, 6);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* par
@@ -156,6 +230,7 @@ function ScoreBoard(props: ScoreBoardProps) {
         givePoint(id, sum);
         console.log(sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* två par
@@ -171,20 +246,25 @@ function ScoreBoard(props: ScoreBoardProps) {
         }
         givePoint(id, sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* tretal
       case "ThreeKind": {
-        const sum: number = Math.max(...findMultiValues(3)) * 3;
+        const values: number[] = findMultiValues(3);
+        const sum: number = values.length > 0 ? Math.max(...values) * 3 : 0;
         givePoint(id, sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* fyrtal
       case "FourKind": {
-        const sum: number = Math.max(...findMultiValues(4)) * 4;
+        const values: number[] = findMultiValues(4);
+        const sum: number = values.length > 0 ? Math.max(...values) * 4 : 0;
         givePoint(id, sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* liten stege
@@ -199,6 +279,7 @@ function ScoreBoard(props: ScoreBoardProps) {
 
         checkStraight(straight, 15, id);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* stor stege
@@ -213,6 +294,7 @@ function ScoreBoard(props: ScoreBoardProps) {
 
         checkStraight(straight, 20, id);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //! kåk
@@ -220,6 +302,7 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum: number = Math.max(...findMultiValues(3)) * 3;
         givePoint(id, sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* chans
@@ -227,6 +310,7 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum = diceSum();
         givePoint(id, sum);
         resetDiceRoll();
+        updateSum();
         break;
       }
       //* yatzy
@@ -235,6 +319,7 @@ function ScoreBoard(props: ScoreBoardProps) {
           givePoint(id, 50);
         }
         resetDiceRoll();
+        updateSum();
         break;
       }
     }
@@ -251,11 +336,12 @@ function ScoreBoard(props: ScoreBoardProps) {
       <tbody>
         {scores &&
           scores.map((score: Score) => (
-            <tr key={score.id}>
-              <td
-                style={{ border: "1px solid", padding: "2px 5px" }}
-                onClick={() => handleClick(score.id)}
-              >
+            <tr
+              key={score.id}
+              id={score.id}
+              onClick={() => handleClick(score.id)}
+            >
+              <td style={{ border: "1px solid", padding: "2px 5px" }}>
                 {score.name}
               </td>
               <td style={{ border: "1px solid", padding: "2px 5px" }}>
