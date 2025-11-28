@@ -2,10 +2,9 @@ import { type Dices } from "./App";
 import { type Dispatch, type SetStateAction, useState, useEffect } from "react";
 
 interface ScoreBoardProps {
-  allowScore: boolean;
+  allowScore?: boolean;
   setAllowScore?: Dispatch<SetStateAction<boolean>>;
   dices: Dices;
-  setRollLeft?: Dispatch<SetStateAction<number>>;
 }
 
 export interface Score {
@@ -35,7 +34,7 @@ export type ScoreList =
   | "Sum";
 
 function ScoreBoard(props: ScoreBoardProps) {
-  const { dices, allowScore, setAllowScore, setRollLeft } = props;
+  const { dices, allowScore, setAllowScore } = props;
 
   const [scores, setScores] = useState<Scores>([
     { id: "Ones", name: "Ones", score: 0 },
@@ -92,21 +91,22 @@ function ScoreBoard(props: ScoreBoardProps) {
 
   //* DELA UT POÄNG
   function givePoint(id: string, sum: number) {
-    if (allowScore) {
-      if (setScores) {
-        setScores(
-          scores.map((score) => {
-            return score.id === id && score.score === 0
-              ? { ...score, score: sum }
-              : score;
-          })
-        );
-      }
-      if (setRollLeft && setAllowScore) {
-        setRollLeft(3);
-        setAllowScore(false);
-      }
-    }
+    if (!allowScore) return;
+
+    setScores((prevScores) => {
+      const updated = prevScores.map((score) =>
+        score.id === id && score.score === 0 ? { ...score, score: sum } : score
+      );
+
+      const total = updated
+        .filter((s) => s.id !== "Sum")
+        .reduce((acc, curr) => acc + curr.score, 0);
+
+      return updated.map((score) =>
+        score.id === "Sum" ? { ...score, score: total } : score
+      );
+    });
+    if (setAllowScore) setAllowScore(false);
   }
 
   //* SUMMERA TÄRNINGAR
@@ -163,20 +163,7 @@ function ScoreBoard(props: ScoreBoardProps) {
     dices.forEach((dice) => {
       dice.roll = true;
     });
-  }
-
-  // //* UPPDATERA SUMMAN
-  function updateSum(): void {
-    scores.map((score) => {
-      if (score.id === "Sum") {
-        const sum = scores
-          .filter((s) => s.id !== "Sum")
-          .reduce((acc, curr) => acc + curr.score, 0);
-
-        return { ...score, score: sum };
-      }
-      return score;
-    });
+    if (setAllowScore) setAllowScore(false);
   }
 
   //* HANDLE CLICK SCOREBOARD
@@ -186,51 +173,43 @@ function ScoreBoard(props: ScoreBoardProps) {
       case "Ones": {
         sameNumber(id, 1);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* tvåor
       case "Twos": {
         sameNumber(id, 2);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* treor
       case "Threes": {
         sameNumber(id, 3);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* fyror
       case "Fours": {
         sameNumber(id, 4);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* femmor
       case "Fives": {
         sameNumber(id, 5);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* sexor
       case "Sixes": {
         sameNumber(id, 6);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* par
       case "OnePair": {
         const sum: number = Math.max(0, ...findMultiValues(2)) * 2;
         givePoint(id, sum);
-        console.log(sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* två par
@@ -246,7 +225,6 @@ function ScoreBoard(props: ScoreBoardProps) {
         }
         givePoint(id, sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* tretal
@@ -255,7 +233,6 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum: number = values.length > 0 ? Math.max(...values) * 3 : 0;
         givePoint(id, sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* fyrtal
@@ -264,7 +241,6 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum: number = values.length > 0 ? Math.max(...values) * 4 : 0;
         givePoint(id, sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* liten stege
@@ -279,7 +255,6 @@ function ScoreBoard(props: ScoreBoardProps) {
 
         checkStraight(straight, 15, id);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* stor stege
@@ -294,7 +269,6 @@ function ScoreBoard(props: ScoreBoardProps) {
 
         checkStraight(straight, 20, id);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //! kåk
@@ -302,7 +276,6 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum: number = Math.max(...findMultiValues(3)) * 3;
         givePoint(id, sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* chans
@@ -310,7 +283,6 @@ function ScoreBoard(props: ScoreBoardProps) {
         const sum = diceSum();
         givePoint(id, sum);
         resetDiceRoll();
-        updateSum();
         break;
       }
       //* yatzy
@@ -319,7 +291,6 @@ function ScoreBoard(props: ScoreBoardProps) {
           givePoint(id, 50);
         }
         resetDiceRoll();
-        updateSum();
         break;
       }
     }

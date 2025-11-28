@@ -29,12 +29,17 @@ function App() {
         }}
       >
         <RollDices
+          allowScore={allowScore}
           setAllowScore={setAllowScore}
           dices={dices}
           setDices={setDices}
         />
         <div style={{ flex: 1 }}>
-          <ScoreBoard allowScore={allowScore} dices={dices}></ScoreBoard>
+          <ScoreBoard
+            allowScore={allowScore}
+            setAllowScore={setAllowScore}
+            dices={dices}
+          ></ScoreBoard>
         </div>
       </div>
     </>
