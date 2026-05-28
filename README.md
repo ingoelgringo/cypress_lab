@@ -43,5 +43,3 @@ npx cypress open-ct # öppnar Cypress component testing (om konfigurerat)
 npx cypress run      # kör E2E-tester
 npx cypress run-ct   # kör component tests (om konfigurerat)
 ```
-
-```
