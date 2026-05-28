@@ -1,73 +1,49 @@
-# React + TypeScript + Vite
+    # Cypress Lab — Skoluppgift i testning
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+    Detta är ett litet skolprojekt för att lära mig testning i moderna webbutvecklingsverktyg. Projektet innehåller en enkel React-applikation skriven i TypeScript och exempel på både komponent- och end-to-end-testning med Cypress.
 
-Currently, two official plugins are available:
+    Syfte
+    - Öva på att skriva automatiserade tester (E2E och komponenttester).
+    - Lära sig konfigurera och använda Cypress tillsammans med Vite + React + TypeScript.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+    Projektets innehåll
+    - App: Yatzy implementerad med React + TypeScript.
+    - Tester: Exempel på komponenttester och end-to-end-tester finns i `cypress/component` och `cypress/e2e`.
 
-## React Compiler
+    Tech stack
+    - Node.js + npm
+    - Vite (snabb utvecklingsserver och bundler)
+    - React
+    - TypeScript
+    - Cypress (E2E och komponenttester)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+    Kom igång
+    1. Installera beroenden:
 
-## Expanding the ESLint configuration
+    ```bash
+    npm install
+    ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+    2. Starta utvecklingsservern:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+    ```bash
+    npm run dev
+    ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+    3. Kör Cypress (interaktivt):
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+    ```bash
+    npx cypress open    # öppnar Test Runner för E2E-tester
+    npx cypress open-ct # öppnar Cypress component testing (om konfigurerat)
+    ```
+
+    4. Kör Cypress headless (CI / terminal):
+
+    ```bash
+    npx cypress run      # kör E2E-tester
+    npx cypress run-ct   # kör component tests (om konfigurerat)
+    ```
+
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
